@@ -1,0 +1,12 @@
+{
+  "version": 3,
+  "file": "bundle.css",
+  "sources": [
+    "../src/components/Month.svelte"
+  ],
+  "sourcesContent": [
+    "<script>\n  import Rectangle from './Rectangle.svelte';\n  export let name;\n  export let days;\n  export let firstDay;\n\n  const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];\n\n  let week = [];\n  let month = [];\n  let dayIndex = weekdays.findIndex(d => d === firstDay);\n  for (let i = 1; i <= days; i++) {\n    week.push({\n      name: weekdays[dayIndex],\n      number: i\n    });\n    \n    if (dayIndex == 6 || i == days) {\n      dayIndex = 0;\n      month.push(week);\n      week = [];\n    } else {\n      dayIndex++;\n    }\n  }\n  console.log(month);\n</script>\n\n<style>\n.container {\n  display: inline-grid;\n  grid-template-columns: repeat(7, 1fr);\n  grid-gap: 2px;\n}\n\n</style>\n\n<h2>{name}</h2>\n<div class=\"container\">\n  {#each month as week}\n      {#each week as day}\n        <Rectangle width=20 height=20 label={day.number}/>\n      {/each}\n  {/each}\n</div>"
+  ],
+  "names": [],
+  "mappings": "AA6BA,UAAU,cAAC,CAAC,AACV,OAAO,CAAE,WAAW,CACpB,qBAAqB,CAAE,OAAO,CAAC,CAAC,CAAC,GAAG,CAAC,CACrC,QAAQ,CAAE,GAAG,AACf,CAAC"
+}
