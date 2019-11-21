@@ -17,7 +17,7 @@
 
   // get the first day of each month of the current year
   const currentYear = new Date().getFullYear();
-  const dates = Array(12).fill(0).map((_, index) => new Date(currentYear, index, 1));
+  const dates = Array(12).fill(0).map((_, index) => new Date(currentYear, index));
 </script>
 
 <style>
@@ -31,6 +31,6 @@
 
 <div class='container'>
   {#each dates as month}
-    <Month name={month.getFullMonth()} days={month.daysInMonth()} firstDay={month.getFullDay()}/>
+    <Month name={month.getFullMonth()} days={month.daysInMonth()} firstDay={month.getFullDay()} date={month}/>
   {/each}
 </div>
