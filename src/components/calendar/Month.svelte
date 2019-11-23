@@ -39,12 +39,13 @@
 .container {
   display: inline-grid;
   grid-template-columns: repeat(7, 1fr);
-  grid-gap: 4px;
+  grid-gap: 1px;
   justify-items: center;
 }
 
 h2 {
   grid-column: 1 / 8;
+  margin: 0px;
 }
 </style>
 
