@@ -74,8 +74,16 @@ var app = (function () {
         else if (node.getAttribute(attribute) !== value)
             node.setAttribute(attribute, value);
     }
+    function to_number(value) {
+        return value === '' ? undefined : +value;
+    }
     function children(element) {
         return Array.from(element.childNodes);
+    }
+    function set_input_value(input, value) {
+        if (value != null || input.value) {
+            input.value = value;
+        }
     }
     function toggle_class(element, name, toggle) {
         element.classList[toggle ? 'add' : 'remove'](name);
@@ -419,10 +427,11 @@ var app = (function () {
     		c: function create() {
     			div = element("div");
     			t = text(ctx.label);
-    			attr_dev(div, "style", ctx.style);
-    			attr_dev(div, "class", "svelte-12b9agr");
+    			attr_dev(div, "id", ctx.id);
+    			attr_dev(div, "class", "svelte-q2rrc8");
     			toggle_class(div, "selected", ctx.selected);
-    			add_location(div, file, 24, 0, 564);
+    			toggle_class(div, "unselected", ctx.unselected);
+    			add_location(div, file, 59, 0, 1132);
     			dispose = listen_dev(div, "click", ctx.onClick, false, false, false);
     		},
     		l: function claim(nodes) {
@@ -437,6 +446,10 @@ var app = (function () {
 
     			if (changed.selected) {
     				toggle_class(div, "selected", ctx.selected);
+    			}
+
+    			if (changed.unselected) {
+    				toggle_class(div, "unselected", ctx.unselected);
     			}
     		},
     		i: noop,
@@ -462,73 +475,82 @@ var app = (function () {
     	let $selectedDays;
     	validate_store(selectedDays, "selectedDays");
     	component_subscribe($$self, selectedDays, $$value => $$invalidate("$selectedDays", $selectedDays = $$value));
-    	let { fillColor = "white" } = $$props;
     	let { label } = $$props;
     	let { date } = $$props;
 
     	function onClick() {
-    		if (date) {
+    		if (!date) {
+    			return;
+    		}
+
+    		if ($selectedDays.includes(date)) {
+    			selectedDays.update(existing => $selectedDays.filter(d => d !== date));
+    		} else {
     			selectedDays.update(existing => [...existing, date]);
     		}
     	}
 
-    	let style = `background-color: ${fillColor}; width: 1.2rem; height: 1.2rem; text-align: center;`;
-    	const writable_props = ["fillColor", "label", "date"];
+    	let id = !!date ? "day" : "header";
+    	const writable_props = ["label", "date"];
 
     	Object.keys($$props).forEach(key => {
     		if (!writable_props.includes(key) && !key.startsWith("$$")) console.warn(`<Day> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$set = $$props => {
-    		if ("fillColor" in $$props) $$invalidate("fillColor", fillColor = $$props.fillColor);
     		if ("label" in $$props) $$invalidate("label", label = $$props.label);
     		if ("date" in $$props) $$invalidate("date", date = $$props.date);
     	};
 
     	$$self.$capture_state = () => {
     		return {
-    			fillColor,
     			label,
     			date,
-    			style,
+    			id,
+    			$selectedDays,
     			selected,
-    			$selectedDays
+    			unselected
     		};
     	};
 
     	$$self.$inject_state = $$props => {
-    		if ("fillColor" in $$props) $$invalidate("fillColor", fillColor = $$props.fillColor);
     		if ("label" in $$props) $$invalidate("label", label = $$props.label);
     		if ("date" in $$props) $$invalidate("date", date = $$props.date);
-    		if ("style" in $$props) $$invalidate("style", style = $$props.style);
-    		if ("selected" in $$props) $$invalidate("selected", selected = $$props.selected);
+    		if ("id" in $$props) $$invalidate("id", id = $$props.id);
     		if ("$selectedDays" in $$props) selectedDays.set($selectedDays = $$props.$selectedDays);
+    		if ("selected" in $$props) $$invalidate("selected", selected = $$props.selected);
+    		if ("unselected" in $$props) $$invalidate("unselected", unselected = $$props.unselected);
     	};
 
     	let selected;
+    	let unselected;
 
-    	$$self.$$.update = (changed = { date: 1, $selectedDays: 1 }) => {
+    	$$self.$$.update = (changed = { date: 1, $selectedDays: 1, selected: 1 }) => {
     		if (changed.date || changed.$selectedDays) {
     			 $$invalidate("selected", selected = date
     			? $selectedDays.some(selectedDay => selectedDay.getTime() === date.getTime())
     			: false);
     		}
+
+    		if (changed.selected) {
+    			 $$invalidate("unselected", unselected = !selected);
+    		}
     	};
 
     	return {
-    		fillColor,
     		label,
     		date,
     		onClick,
-    		style,
-    		selected
+    		id,
+    		selected,
+    		unselected
     	};
     }
 
     class Day extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance, create_fragment, safe_not_equal, { fillColor: 0, label: 0, date: 0 });
+    		init(this, options, instance, create_fragment, safe_not_equal, { label: 0, date: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -547,14 +569,6 @@ var app = (function () {
     		if (ctx.date === undefined && !("date" in props)) {
     			console.warn("<Day> was created without expected prop 'date'");
     		}
-    	}
-
-    	get fillColor() {
-    		throw new Error("<Day>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set fillColor(value) {
-    		throw new Error("<Day>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
     	get label() {
@@ -589,7 +603,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (54:6) {#each week as day}
+    // (55:6) {#each week as day}
     function create_each_block_1(ctx) {
     	let current;
 
@@ -625,14 +639,14 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(54:6) {#each week as day}",
+    		source: "(55:6) {#each week as day}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (53:2) {#each month as week}
+    // (54:2) {#each month as week}
     function create_each_block(ctx) {
     	let each_1_anchor;
     	let current;
@@ -719,7 +733,7 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(53:2) {#each month as week}",
+    		source: "(54:2) {#each month as week}",
     		ctx
     	});
 
@@ -754,10 +768,10 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			attr_dev(h2, "class", "svelte-13dj3lm");
-    			add_location(h2, file$1, 51, 2, 1083);
-    			attr_dev(div, "class", "container svelte-13dj3lm");
-    			add_location(div, file$1, 50, 0, 1057);
+    			attr_dev(h2, "class", "svelte-y931n4");
+    			add_location(h2, file$1, 52, 2, 1098);
+    			attr_dev(div, "class", "container svelte-y931n4");
+    			add_location(div, file$1, 51, 0, 1072);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -1176,33 +1190,129 @@ var app = (function () {
     const file$3 = "src/components/PtoCalculator.svelte";
 
     function create_fragment$3(ctx) {
-    	let p;
-    	let t0;
-    	let t1_value = ctx.$selectedDays.length + "";
+    	let div;
+    	let span0;
     	let t1;
+    	let span1;
+    	let t3;
+    	let input0;
+    	let input0_updating = false;
+    	let t4;
+    	let input1;
+    	let input1_updating = false;
+    	let t5;
+    	let span2;
+    	let t7;
+    	let span3;
+    	let t9;
+    	let span4;
+    	let t10_value = ctx.$selectedDays.length + "";
+    	let t10;
+    	let t11;
+    	let span5;
+    	let t12;
+    	let dispose;
+
+    	function input0_input_handler() {
+    		input0_updating = true;
+    		ctx.input0_input_handler.call(input0);
+    	}
+
+    	function input1_input_handler() {
+    		input1_updating = true;
+    		ctx.input1_input_handler.call(input1);
+    	}
 
     	const block = {
     		c: function create() {
-    			p = element("p");
-    			t0 = text("Days taken off: ");
-    			t1 = text(t1_value);
-    			add_location(p, file$3, 7, 0, 112);
+    			div = element("div");
+    			span0 = element("span");
+    			span0.textContent = "Weekly Accrual Rate";
+    			t1 = space();
+    			span1 = element("span");
+    			span1.textContent = "Starting PTO (hours):";
+    			t3 = space();
+    			input0 = element("input");
+    			t4 = space();
+    			input1 = element("input");
+    			t5 = space();
+    			span2 = element("span");
+    			span2.textContent = "Planned PTO (hours):";
+    			t7 = space();
+    			span3 = element("span");
+    			span3.textContent = "End of Year Balance (hours):";
+    			t9 = space();
+    			span4 = element("span");
+    			t10 = text(t10_value);
+    			t11 = space();
+    			span5 = element("span");
+    			t12 = text(ctx.predicted);
+    			add_location(span0, file$3, 48, 2, 1016);
+    			add_location(span1, file$3, 49, 2, 1052);
+    			attr_dev(input0, "type", "number");
+    			attr_dev(input0, "step", "0.0001");
+    			attr_dev(input0, "min", "0");
+    			add_location(input0, file$3, 50, 2, 1089);
+    			attr_dev(input1, "type", "number");
+    			attr_dev(input1, "min", "0");
+    			add_location(input1, file$3, 51, 2, 1151);
+    			add_location(span2, file$3, 52, 2, 1201);
+    			add_location(span3, file$3, 53, 2, 1237);
+    			add_location(span4, file$3, 54, 2, 1281);
+    			add_location(span5, file$3, 55, 2, 1319);
+    			attr_dev(div, "class", "container svelte-jt56ls");
+    			add_location(div, file$3, 47, 0, 990);
+
+    			dispose = [
+    				listen_dev(input0, "input", input0_input_handler),
+    				listen_dev(input1, "input", input1_input_handler)
+    			];
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, p, anchor);
-    			append_dev(p, t0);
-    			append_dev(p, t1);
+    			insert_dev(target, div, anchor);
+    			append_dev(div, span0);
+    			append_dev(div, t1);
+    			append_dev(div, span1);
+    			append_dev(div, t3);
+    			append_dev(div, input0);
+    			set_input_value(input0, ctx.velocity);
+    			append_dev(div, t4);
+    			append_dev(div, input1);
+    			set_input_value(input1, ctx.starting);
+    			append_dev(div, t5);
+    			append_dev(div, span2);
+    			append_dev(div, t7);
+    			append_dev(div, span3);
+    			append_dev(div, t9);
+    			append_dev(div, span4);
+    			append_dev(span4, t10);
+    			append_dev(div, t11);
+    			append_dev(div, span5);
+    			append_dev(span5, t12);
     		},
     		p: function update(changed, ctx) {
-    			if (changed.$selectedDays && t1_value !== (t1_value = ctx.$selectedDays.length + "")) set_data_dev(t1, t1_value);
+    			if (!input0_updating && changed.velocity) {
+    				set_input_value(input0, ctx.velocity);
+    			}
+
+    			input0_updating = false;
+
+    			if (!input1_updating && changed.starting) {
+    				set_input_value(input1, ctx.starting);
+    			}
+
+    			input1_updating = false;
+    			if (changed.$selectedDays && t10_value !== (t10_value = ctx.$selectedDays.length + "")) set_data_dev(t10, t10_value);
+    			if (changed.predicted) set_data_dev(t12, ctx.predicted);
     		},
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(p);
+    			if (detaching) detach_dev(div);
+    			run_all(dispose);
     		}
     	};
 
@@ -1217,20 +1327,89 @@ var app = (function () {
     	return block;
     }
 
+    function isSunday(date) {
+    	return date.getDay() === 0;
+    }
+
+    function incrementDay(date) {
+    	date.setDate(date.getDate() + 1);
+    }
+
+    function weeksBetweenDates(start, end) {
+    	let date = new Date(start.getTime());
+    	let numSundays = 0;
+
+    	do {
+    		incrementDay(date);
+
+    		if (isSunday(date)) {
+    			numSundays++;
+    		}
+    	} while (date.getTime() < end.getTime());
+
+    	return numSundays;
+    }
+
     function instance$3($$self, $$props, $$invalidate) {
     	let $selectedDays;
     	validate_store(selectedDays, "selectedDays");
     	component_subscribe($$self, selectedDays, $$value => $$invalidate("$selectedDays", $selectedDays = $$value));
+    	let starting = 0;
+    	let velocity = 0;
+    	let today = new Date();
+    	let nextYear = new Date(today.getFullYear() + 1, 0, 1);
+
+    	function input0_input_handler() {
+    		velocity = to_number(this.value);
+    		$$invalidate("velocity", velocity);
+    	}
+
+    	function input1_input_handler() {
+    		starting = to_number(this.value);
+    		$$invalidate("starting", starting);
+    	}
 
     	$$self.$capture_state = () => {
     		return {};
     	};
 
     	$$self.$inject_state = $$props => {
+    		if ("starting" in $$props) $$invalidate("starting", starting = $$props.starting);
+    		if ("velocity" in $$props) $$invalidate("velocity", velocity = $$props.velocity);
+    		if ("today" in $$props) $$invalidate("today", today = $$props.today);
+    		if ("nextYear" in $$props) $$invalidate("nextYear", nextYear = $$props.nextYear);
+    		if ("plannedPto" in $$props) $$invalidate("plannedPto", plannedPto = $$props.plannedPto);
     		if ("$selectedDays" in $$props) selectedDays.set($selectedDays = $$props.$selectedDays);
+    		if ("gainedPto" in $$props) $$invalidate("gainedPto", gainedPto = $$props.gainedPto);
+    		if ("predicted" in $$props) $$invalidate("predicted", predicted = $$props.predicted);
     	};
 
-    	return { $selectedDays };
+    	let plannedPto;
+    	let gainedPto;
+    	let predicted;
+
+    	$$self.$$.update = (changed = { $selectedDays: 1, today: 1, nextYear: 1, velocity: 1, starting: 1, gainedPto: 1, plannedPto: 1 }) => {
+    		if (changed.$selectedDays) {
+    			 $$invalidate("plannedPto", plannedPto = $selectedDays.length * 8);
+    		}
+
+    		if (changed.today || changed.nextYear || changed.velocity) {
+    			 $$invalidate("gainedPto", gainedPto = weeksBetweenDates(today, nextYear) * velocity);
+    		}
+
+    		if (changed.starting || changed.gainedPto || changed.plannedPto) {
+    			 $$invalidate("predicted", predicted = Math.floor(starting + gainedPto - plannedPto));
+    		}
+    	};
+
+    	return {
+    		starting,
+    		velocity,
+    		$selectedDays,
+    		predicted,
+    		input0_input_handler,
+    		input1_input_handler
+    	};
     }
 
     class PtoCalculator extends SvelteComponentDev {
