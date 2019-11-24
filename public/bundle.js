@@ -1206,7 +1206,6 @@ var app = (function () {
     	let span3;
     	let t9;
     	let span4;
-    	let t10_value = ctx.$selectedDays.length + "";
     	let t10;
     	let t11;
     	let span5;
@@ -1243,7 +1242,7 @@ var app = (function () {
     			span3.textContent = "End of Year Balance (hours):";
     			t9 = space();
     			span4 = element("span");
-    			t10 = text(t10_value);
+    			t10 = text(ctx.plannedPto);
     			t11 = space();
     			span5 = element("span");
     			t12 = text(ctx.predicted);
@@ -1259,7 +1258,7 @@ var app = (function () {
     			add_location(span2, file$3, 52, 2, 1201);
     			add_location(span3, file$3, 53, 2, 1237);
     			add_location(span4, file$3, 54, 2, 1281);
-    			add_location(span5, file$3, 55, 2, 1319);
+    			add_location(span5, file$3, 55, 2, 1309);
     			attr_dev(div, "class", "container svelte-jt56ls");
     			add_location(div, file$3, 47, 0, 990);
 
@@ -1305,7 +1304,7 @@ var app = (function () {
     			}
 
     			input1_updating = false;
-    			if (changed.$selectedDays && t10_value !== (t10_value = ctx.$selectedDays.length + "")) set_data_dev(t10, t10_value);
+    			if (changed.plannedPto) set_data_dev(t10, ctx.plannedPto);
     			if (changed.predicted) set_data_dev(t12, ctx.predicted);
     		},
     		i: noop,
@@ -1405,7 +1404,7 @@ var app = (function () {
     	return {
     		starting,
     		velocity,
-    		$selectedDays,
+    		plannedPto,
     		predicted,
     		input0_input_handler,
     		input1_input_handler

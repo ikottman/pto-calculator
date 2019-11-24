@@ -52,6 +52,6 @@
   <input type=number bind:value={starting} min=0>
   <span>Planned PTO (hours):</span>
   <span>End of Year Balance (hours):</span>
-  <span>{$selectedDays.length}</span>
+  <span>{plannedPto}</span>
   <span>{predicted}</span>
 </div>
