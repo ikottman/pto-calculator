@@ -1,27 +1,7 @@
 <script>
-  import { selectedDays } from './calendar/store.js'
   import { get } from 'svelte/store'
-
-  function isSunday(date) {
-    return date.getDay() === 0;
-  }
-
-  function incrementDay(date) {
-    date.setDate(date.getDate() + 1);
-  }
-
-  function weeksBetweenDates(start, end) {
-    let date = new Date(start.getTime());
-    let numSundays = 0;
-    do {
-      incrementDay(date);
-      if (isSunday(date)) { 
-        numSundays++; 
-      }
-    } while (date.getTime() < end.getTime())
-
-    return numSundays;
-  }
+  import { selectedDays } from './calendar/store.js'
+  import { weeksBetweenDates } from '../lib/DateMath.js'
 
   let starting = 0;
   let velocity = 0;
@@ -38,10 +18,6 @@
   grid-template-columns: repeat(2, 1fr);
   align-items: center;
   grid-gap: 5px;
-}
-
-.row {
-  height: 1rem;
 }
 </style>
 
