@@ -41,7 +41,7 @@
   }
 </style>
 
-<div title="{title}"
+<div title='{title}'
   on:click={onClick}
   class:bold
   class:selectable
