@@ -1,15 +1,12 @@
 <script>
   import { get } from 'svelte/store'
-  import { selectedDays } from './calendar/store.js'
+  import { selectedDays, starting, velocity, plannedPto } from './calendar/store.js'
   import { weeksBetweenDates } from '../lib/DateMath.js'
 
-  let starting = 0;
-  let velocity = 0;
   let today = new Date();
   let nextYear = new Date(today.getFullYear() + 1, 0, 1);
-  $: plannedPto = $selectedDays.length * 8;
-  $: gainedPto = weeksBetweenDates(today, nextYear) * velocity;
-  $: predicted = Math.floor(starting + gainedPto - plannedPto );
+  $: gainedPto = weeksBetweenDates(today, nextYear) * $velocity;
+  $: predicted = Math.floor($starting + gainedPto - $plannedPto);
 </script>
 
 <style>
@@ -24,10 +21,10 @@
 <div class='container'>
   <span>Weekly Accrual Rate</span> 
   <span>Starting PTO (hours):</span>
-  <input type=number step=0.0001 bind:value={velocity} min=0>
-  <input type=number bind:value={starting} min=0>
+  <input type=number step=0.0001 bind:value={$velocity} min=0>
+  <input type=number bind:value={$starting} min=0>
   <span>Planned PTO (hours):</span>
   <span>End of Year Balance (hours):</span>
-  <span>{plannedPto}</span>
+  <span>{$plannedPto}</span>
   <span>{predicted}</span>
 </div>

@@ -1,5 +1,6 @@
 <script>
-  import { selectedDays } from './store.js'
+  import { selectedDays, starting, velocity, plannedPto } from './store.js'
+  import { weeksBetweenDates } from '../../lib/DateMath.js'
   import { get } from 'svelte/store'
   export let label;
   export let date;
@@ -16,9 +17,16 @@
     }
   }
 
-  let id = !!date ? "day" : "header";
+  let today = new Date();
+  let predicted = 0;
   $: selected = date ? $selectedDays.some(selectedDay => selectedDay.getTime() === date.getTime()) : false;
   $: unselected = !selected;
+  $: if (date) {
+    let gainedPto = weeksBetweenDates(today, date) * $velocity;
+    predicted = Math.floor($starting + gainedPto - $plannedPto);
+  }
+
+  let id = !!date ? "day" : "header";
 </script>
 
 <style>
@@ -57,4 +65,4 @@
   }
 </style>
 
-<div {id} class:selected class:unselected on:click={onClick}>{label}</div>
+<div title="{predicted}" {id} class:selected class:unselected on:click={onClick}>{label}</div>
