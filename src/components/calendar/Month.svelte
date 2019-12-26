@@ -1,5 +1,6 @@
 <script>
   import Day from './Day.svelte';
+  import Circle from './Circle.svelte';
   export let name;
   export let days;
   export let firstDay;
@@ -53,7 +54,15 @@ h2 {
   <h2>{name}</h2>
   {#each month as week}
       {#each week as day}
-        <Day label={day.label} date={day.date}/>
+        {#if day.date}
+          <Day date={day.date}>
+            {day.label}
+          </Day>
+        {:else}
+          <Circle bold>
+            {day.label}
+          </Circle>
+        {/if}
       {/each}
   {/each}
 </div>
